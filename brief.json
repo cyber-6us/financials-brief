@@ -1,0 +1,5 @@
+{
+  "date": "2026-05-31",
+  "generated_at": "2026-05-31T00:00:00Z",
+  "content": "<h3 class=\"sec-primary\">Welcome to FinBrief</h3><div class=\"item\"><p class=\"headline\"><strong>Setup complete.</strong> Your first brief hasn't been generated yet.</p><p class=\"read\"><em>Next step:</em> Go to your GitHub repo → Actions tab → \"Generate Daily Brief\" → Run workflow. The brief will appear here within ~60 seconds.</p><span class=\"action monitor\">→ SETUP NEEDED</span></div>"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Financials Morning Brief",
+  "short_name": "FinBrief",
+  "description": "Daily financial sector intelligence for long/short equity and credit PMs",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "orientation": "portrait-primary"
+}

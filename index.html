@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FinBrief">
+  <title>FinBrief</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 17, 23, 0.93);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #30363d;
+      padding: 12px 16px calc(12px + env(safe-area-inset-top));
+      padding-top: calc(12px + env(safe-area-inset-top));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-title { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
+    .app-title span { color: #58a6ff; }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .brief-date { font-size: 12px; color: #8b949e; }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid #30363d;
+      color: #8b949e;
+      cursor: pointer;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      transition: all 0.15s;
+    }
+    .refresh-btn:active { background: #161b22; color: #e6edf3; }
+
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* States */
+    .state { text-align: center; padding: 64px 20px; color: #8b949e; }
+
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid #30363d;
+      border-top-color: #58a6ff;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-icon { font-size: 28px; margin-bottom: 10px; }
+    .error-msg { font-size: 13px; }
+    .retry-btn {
+      margin-top: 14px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* Brief content */
+    .brief h3 {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      margin: 22px 0 10px;
+      padding: 7px 10px;
+      border-radius: 5px;
+    }
+    .brief h3:first-child { margin-top: 0; }
+
+    .brief h3.sec-primary  { color: #58a6ff; background: rgba(88,166,255,0.09); border-left: 3px solid #58a6ff; }
+    .brief h3.sec-secondary { color: #e3b341; background: rgba(227,179,65,0.09); border-left: 3px solid #e3b341; }
+    .brief h3.sec-macro    { color: #3fb950; background: rgba(63,185,80,0.09);  border-left: 3px solid #3fb950; }
+
+    .brief .item {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 13px 15px;
+      margin-bottom: 9px;
+    }
+
+    .brief .headline { font-size: 14px; margin-bottom: 7px; line-height: 1.5; }
+    .brief .headline strong { font-weight: 600; }
+    .brief .headline a { color: #58a6ff; text-decoration: none; }
+    .brief .headline a:hover { text-decoration: underline; }
+
+    .brief .read { font-size: 13px; color: #c9d1d9; margin-bottom: 9px; line-height: 1.55; }
+    .brief .read em {
+      font-style: normal;
+      color: #8b949e;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+    }
+
+    .brief .action {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .brief .action.dig-in    { background: rgba(248,81,73,0.14);  color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+    .brief .action.monitor   { background: rgba(227,179,65,0.14); color: #e3b341; border: 1px solid rgba(227,179,65,0.3); }
+    .brief .action.no-action { background: rgba(63,185,80,0.14);  color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+
+    .brief .nothing { font-size: 13px; color: #8b949e; font-style: italic; padding: 6px 0; }
+    .brief hr { display: none; }
+
+    .last-updated {
+      text-align: center;
+      font-size: 11px;
+      color: #8b949e;
+      margin-top: 20px;
+      padding-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">Fin<span>Brief</span></div>
+  <div class="header-right">
+    <span class="brief-date" id="brief-date"></span>
+    <button class="refresh-btn" onclick="loadBrief()">↻ Refresh</button>
+  </div>
+</header>
+
+<div class="content">
+  <div id="state-loading" class="state">
+    <div class="spinner"></div>
+    <div>Loading brief…</div>
+  </div>
+
+  <div id="state-error" class="state" style="display:none">
+    <div class="error-icon">⚠️</div>
+    <div class="error-msg" id="error-msg">Failed to load brief.</div>
+    <button class="retry-btn" onclick="loadBrief()">Retry</button>
+  </div>
+
+  <div id="brief-content" class="brief" style="display:none"></div>
+  <div id="last-updated" class="last-updated" style="display:none"></div>
+</div>
+
+<script>
+  async function loadBrief() {
+    show('loading');
+    try {
+      const res = await fetch('./brief.json?t=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      if (data.date) {
+        const d = new Date(data.date + 'T12:00:00Z');
+        document.getElementById('brief-date').textContent =
+          d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      }
+
+      document.getElementById('brief-content').innerHTML = data.content || '<p>No content.</p>';
+
+      if (data.generated_at) {
+        const g = new Date(data.generated_at);
+        document.getElementById('last-updated').textContent =
+          'Generated ' + g.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+        document.getElementById('last-updated').style.display = 'block';
+      }
+
+      show('content');
+    } catch (e) {
+      document.getElementById('error-msg').textContent = 'Could not load brief: ' + e.message;
+      show('error');
+    }
+  }
+
+  function show(state) {
+    document.getElementById('state-loading').style.display  = state === 'loading'  ? 'block' : 'none';
+    document.getElementById('state-error').style.display    = state === 'error'    ? 'block' : 'none';
+    document.getElementById('brief-content').style.display  = state === 'content'  ? 'block' : 'none';
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+
+  loadBrief();
+</script>
+</body>
+</html>
