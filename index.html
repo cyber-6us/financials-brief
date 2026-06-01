@@ -100,6 +100,11 @@
     }
     .brief h3:first-child { margin-top: 0; }
 
+    .brief h3.sec-top      { color: #f85149; background: rgba(248,81,73,0.09);   border-left: 3px solid #f85149; }
+    .brief h3.sec-names    { color: #58a6ff; background: rgba(88,166,255,0.09);  border-left: 3px solid #58a6ff; }
+    .brief h3.sec-credit   { color: #e3b341; background: rgba(227,179,65,0.09); border-left: 3px solid #e3b341; }
+    .brief h3.sec-calendar { color: #3fb950; background: rgba(63,185,80,0.09);  border-left: 3px solid #3fb950; }
+    /* legacy classes kept for any old briefs */
     .brief h3.sec-primary  { color: #58a6ff; background: rgba(88,166,255,0.09); border-left: 3px solid #58a6ff; }
     .brief h3.sec-secondary { color: #e3b341; background: rgba(227,179,65,0.09); border-left: 3px solid #e3b341; }
     .brief h3.sec-macro    { color: #3fb950; background: rgba(63,185,80,0.09);  border-left: 3px solid #3fb950; }
@@ -111,14 +116,25 @@
       padding: 13px 15px;
       margin-bottom: 9px;
     }
+    .brief .item.top-item {
+      border-color: rgba(248,81,73,0.35);
+      background: rgba(248,81,73,0.05);
+    }
 
     .brief .headline { font-size: 14px; margin-bottom: 7px; line-height: 1.5; }
     .brief .headline strong { font-weight: 600; }
     .brief .headline a { color: #58a6ff; text-decoration: none; }
     .brief .headline a:hover { text-decoration: underline; }
 
-    .brief .read { font-size: 13px; color: #c9d1d9; margin-bottom: 9px; line-height: 1.55; }
-    .brief .read em {
+    .brief .vs-baseline,
+    .brief .read,
+    .brief .implication,
+    .brief .sources { font-size: 13px; color: #c9d1d9; margin-bottom: 6px; line-height: 1.55; }
+    .brief .sources { margin-bottom: 0; }
+    .brief .vs-baseline em,
+    .brief .read em,
+    .brief .implication em,
+    .brief .sources em {
       font-style: normal;
       color: #8b949e;
       font-size: 10px;
@@ -126,7 +142,25 @@
       letter-spacing: 0.6px;
       font-weight: 700;
     }
+    .brief .sources a { color: #58a6ff; text-decoration: none; font-style: normal; font-size: 13px; }
+    .brief .sources a:hover { text-decoration: underline; }
 
+    /* Info-state tags */
+    .brief .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+    .brief .tag.new        { background: rgba(88,166,255,0.14);  color: #58a6ff; border: 1px solid rgba(88,166,255,0.3); }
+    .brief .tag.delta-up   { background: rgba(63,185,80,0.14);   color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+    .brief .tag.delta-down { background: rgba(248,81,73,0.14);   color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+    .brief .tag.in-line    { background: rgba(139,148,158,0.14); color: #8b949e; border: 1px solid rgba(139,148,158,0.3); }
+
+    /* legacy action tags */
     .brief .action {
       display: inline-block;
       font-size: 10px;
