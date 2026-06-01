@@ -92,16 +92,46 @@ If a quiet day, say so briefly — do not manufacture content."""
 
 def get_user_prompt():
     today = date.today().strftime("%d %B %Y")
-    return f"""Today is {today}. Run the morning brief.
+    return f"""Today is {today}. Run the morning brief (Sweep mode).
 
-Search the web for MATERIAL events in the last 24 hours covering:
-- European financials: banks (DBK, CBK, BNP, SocGen, UniCredit, ING, Santander, Barclays, HSBC, UBS, Julius Baer), insurers (Allianz, AXA, Generali, Zurich, Munich Re), asset managers (Amundi, DWS), payments/fintech (Adyen, Worldline, Nexi, Wise), exchanges (Deutsche Boerse, Euronext, LSE Group)
-- US/LatAm/China financials
-- ECB, SNB, Fed, PBoC decisions; Basel/capital rules; sovereign or sector credit events
+Search the web for **material events in the last 24 hours** (or since the last trading session) across:
 
-For each item: (a) what happened, one line; (b) long/short read — why it matters for positioning; (c) next step: NO ACTION / MONITOR / DIG IN.
-Group: PRIMARY (EU) → SECONDARY (US/LatAm/China) → MACRO/POLICY.
-Flag estimated or unconfirmed numbers with [est.]."""
+**PRIMARY — European financials:**
+- Banks: DBK, CBK, BNP, SocGen, UniCredit, ING, Santander, Barclays, HSBC, UBS, Julius Baer
+- Insurers (lower priority): Allianz, AXA, Generali, Zurich, Munich Re
+- Asset managers: Amundi, DWS
+- Payments / fintech: Adyen, Worldline, Nexi, Wise
+- Exchanges: Deutsche Boerse, Euronext, LSE Group
+- Private credit / private capital (Europe and US — names and managers in scope regardless of geography, e.g. Apollo, Ares, Blackstone, KKR, Blue Owl, HPS, Sixth Street, and European direct lenders): direct-lending and BDC flows (fundraising, redemptions, gating), fund pricing and NAV marks, asset sales / portfolio trades, defaults and restructurings, bank–private-credit risk transfer (SRT, forward-flow, NAV financing). Track the read-through to bank syndication, leveraged-finance pipelines, and where private marks diverge from public comps. Give size, yield / spread, and counterparties on deals where disclosed; flag with [est.] if unconfirmed.
+
+**SECONDARY — US / LatAm / China financials:** surface only if directly price-moving or carrying read-through to a primary name or theme.
+
+**SECONDARY — Real estate:** listed property / REITs and the sector broadly (esp. CRE — office, retail, logistics; and residential developers), with emphasis on the channel into financials: bank CRE-loan exposure, property-backed credit, REIT funding/refinancing, cap-rate moves. Surface on the same price-moving / read-through test as the financials above. Highlight key transactions — asset and portfolio deals, M&A, recapitalisations, distressed sales — and for each give size (value / GLA), yield (entry cap rate / NIY), buyer & seller, and financing where disclosed; flag any with [est.] if unconfirmed. Read-through to lenders, valuations, and the credit cycle is the point.
+
+**MACRO / POLICY:** cover the following, but always through a financials read-through — every macro item must terminate in a transmission to the book (rates / NII / funding cost, credit cycle / spreads, FX translation, risk-on/off positioning, sovereign-bank loop). Macro with no financials channel is noise — drop it.
+- Central banks: ECB, SNB, Fed, PBoC, BoE decisions, minutes, speeches, and shifts in rate-path expectations; QT / balance-sheet, liquidity ops, deposit-rate signals.
+- Inflation & data: CPI / PCE / PPI prints, wage and labour data, PMIs — vs. consensus and vs. the prior path; flag where a deviation repriced the curve.
+- Rates & curve: sovereign yield and curve moves (Bunds, OATs, BTPs, USTs, Gilts, SNB-relevant), spread widening/compression, peripheral spreads (BTP-Bund), credit / IG-HY spreads.
+- Politics & elections: elections, polls, government formation/collapse, fiscal and budget news, regulatory or tax policy shifts (bank levies, windfall taxes, M&A/merger politics) — especially EU, periphery, France, Germany, UK, US, and key EM.
+- War & conflict: geopolitical escalation/de-escalation, sanctions, supply-chain or energy-security shocks with a risk-sentiment or sector-exposure channel.
+- Commodities: oil (Brent/WTI), gas, gold — moves large enough to shift inflation expectations, energy-sector credit, or EM/petrostate sovereign risk.
+- Real estate prices: residential and commercial price indices, cap-rate / valuation moves, transaction-volume and rental trends, and refinancing-wall stress — where they read into bank CRE books, mortgage credit quality, property-backed lending, or the broader credit cycle.
+- Sovereign & sector credit: rating actions, sovereign stress, funding-market dislocation, Basel / capital-rule developments, any event touching the sovereign-bank doom loop.
+
+Apply the materiality and triage logic from the system prompt:
+- Classify every item by information state and tag it: [NEW] / [DELTA ▲] / [DELTA ▼] / [IN LINE].
+- Keep expected events that have arrived in line where a miss would have been price-moving — flag the binary as resolved. Drop expected-and-immaterial items.
+- Lead each item with the delta vs. the prior baseline (what's new / changed / confirmed), not the event headline.
+
+For each item (applies to ALL three groups — PRIMARY, SECONDARY, and every MACRO / POLICY item alike):
+- (a) What happened — one line.
+- (b) Long/short read — why it matters for positioning; equity vs credit leg, direction; fact separated from inference. For macro items, this is the transmission channel to the book.
+- (c) Next step — NO ACTION / MONITOR / DIG IN.
+- Sources — hyperlink(s), one or more, at the end of every point without exception; primary source (central bank / statistical agency / regulator / company release / exchange filing) over secondary coverage. No source, no item.
+
+Output: every item — primary, secondary, and macro — is a bullet, tagged with its information state, and ends with its source link(s). Group PRIMARY (EU) → SECONDARY (US/LatAm/China) → MACRO/POLICY, ranked by relevance within each. Lead with Top of Book if anything clears that bar. Scannable in under two minutes.
+
+Flag estimated or unconfirmed numbers with [est.]. If sourcing is thin, say so in one clause rather than inflating confidence. Quiet session → say so in a couple of lines; do not manufacture content."""
 
 
 def generate_brief():
