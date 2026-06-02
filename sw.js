@@ -1,4 +1,4 @@
-const CACHE = 'finbrief-v1';
+const CACHE = 'finbrief-v3';
 const SHELL = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
