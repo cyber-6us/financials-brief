@@ -127,44 +127,55 @@
       padding: 0;
       margin: 0 0 10px 0;
     }
+
+    /* Top-level item — card style */
     .brief ul > li {
       background: #161b22;
       border: 1px solid #30363d;
       border-radius: 8px;
-      padding: 11px 14px;
+      padding: 11px 14px 11px 20px;
       margin-bottom: 7px;
       font-size: 14px;
       line-height: 1.55;
       position: relative;
-      padding-left: 22px;
     }
     .brief ul > li::before {
-      content: "–";
+      content: "▸";
       position: absolute;
-      left: 9px;
-      color: #8b949e;
+      left: 7px;
+      top: 11px;
+      color: #58a6ff;
+      font-size: 11px;
     }
+    /* Top-of-book items get red tint */
     .brief h3.sec-top + ul > li {
       border-color: rgba(248,81,73,0.35);
       background: rgba(248,81,73,0.05);
     }
+    .brief h3.sec-top + ul > li::before { color: #f85149; }
+
+    /* Level 2 — indented sub-bullets (Vs. baseline / Read / Sources) */
     .brief ul > li > ul {
-      margin: 6px 0 0 0;
-      padding: 0;
+      margin: 7px 0 0 0;
+      padding: 0 0 0 14px;
+      border-left: 2px solid #30363d;
     }
     .brief ul > li > ul > li {
       background: none;
       border: none;
       border-radius: 0;
-      padding: 2px 0 2px 16px;
-      margin-bottom: 2px;
+      padding: 3px 0 3px 12px;
+      margin-bottom: 1px;
       font-size: 13px;
       color: #c9d1d9;
+      line-height: 1.5;
     }
     .brief ul > li > ul > li::before {
-      content: "·";
-      left: 4px;
+      content: "–";
+      left: 0;
+      top: 3px;
       color: #8b949e;
+      font-size: 12px;
     }
     .brief ul > li > ul > li em {
       font-style: normal;
