@@ -149,6 +149,7 @@ def fetch_polygon_news(lookback_hours=24):
     return items
 
 
+RSS_FEEDS = {
     "FT Markets":       "https://www.ft.com/rss/home/markets",
     "FT Companies":     "https://www.ft.com/rss/home/companies",
     "FT World":         "https://www.ft.com/rss/home/world",
