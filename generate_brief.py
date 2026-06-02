@@ -203,7 +203,8 @@ def get_user_prompt():
     today = date.today().strftime("%d %B %Y")
     rss_items     = fetch_rss_headlines()
     polygon_items = fetch_polygon_news()
-    all_items     = polygon_items + rss_items  # Polygon first — ticker-tagged, fresher
+    # Cap to keep prompt within token limits: Polygon top 40, RSS top 40
+    all_items     = polygon_items[:40] + rss_items[:40]
     if all_items:
         rss_block = (
             "## FRESH HEADLINES FROM PREMIUM FEEDS (last 24h)\n"
@@ -262,9 +263,9 @@ def call_api_with_retry(client, **kwargs):
         try:
             return client.beta.messages.create(**kwargs)
         except anthropic.APIStatusError as e:
-            if e.status_code == 529 and attempt < 4:
-                wait = 30 * (attempt + 1)
-                print(f"API overloaded, retrying in {wait}s...", flush=True)
+            if e.status_code in (429, 529) and attempt < 4:
+                wait = 60 * (attempt + 1)
+                print(f"API error {e.status_code}, retrying in {wait}s...", flush=True)
                 time.sleep(wait)
             else:
                 raise
