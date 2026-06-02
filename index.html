@@ -121,6 +121,62 @@
       background: rgba(248,81,73,0.05);
     }
 
+    /* Bullet list styles */
+    .brief ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+    }
+    .brief ul > li {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 11px 14px;
+      margin-bottom: 7px;
+      font-size: 14px;
+      line-height: 1.55;
+      position: relative;
+      padding-left: 22px;
+    }
+    .brief ul > li::before {
+      content: "–";
+      position: absolute;
+      left: 9px;
+      color: #8b949e;
+    }
+    .brief h3.sec-top + ul > li {
+      border-color: rgba(248,81,73,0.35);
+      background: rgba(248,81,73,0.05);
+    }
+    .brief ul > li > ul {
+      margin: 6px 0 0 0;
+      padding: 0;
+    }
+    .brief ul > li > ul > li {
+      background: none;
+      border: none;
+      border-radius: 0;
+      padding: 2px 0 2px 16px;
+      margin-bottom: 2px;
+      font-size: 13px;
+      color: #c9d1d9;
+    }
+    .brief ul > li > ul > li::before {
+      content: "·";
+      left: 4px;
+      color: #8b949e;
+    }
+    .brief ul > li > ul > li em {
+      font-style: normal;
+      color: #8b949e;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+    }
+    .brief ul a { color: #58a6ff; text-decoration: none; }
+    .brief ul a:hover { text-decoration: underline; }
+
     .brief .headline { font-size: 14px; margin-bottom: 7px; line-height: 1.5; }
     .brief .headline strong { font-weight: 600; }
     .brief .headline a { color: #58a6ff; text-decoration: none; }

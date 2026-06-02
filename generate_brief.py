@@ -64,33 +64,37 @@ Only items clearing steps 1–2 reach output. Items clearing 1–4 but not actio
 
 Produce ONLY the brief as HTML inner content (no <html>, <head>, or <body> tags). Output nothing before the first heading tag. No preamble. No filler. No markdown code fences.
 
+Everything is bullet points — no prose paragraphs, no multi-line blocks. Each item is a single <li> inside a <ul>. Sub-bullets for read and implication go inside a nested <ul>.
+
 Use this structure:
 
 <h3 class="sec-top">TOP OF BOOK</h3>
-For the 1–3 things that actually matter today:
-<div class="item top-item">
-  <p class="headline"><strong>NAME (TICKER) — [TAG]</strong> event in one line.</p>
-  <p class="vs-baseline"><em>Vs. baseline:</em> what is new / what changed / what was confirmed.</p>
-  <p class="read"><em>Read:</em> the non-consensus angle, fact separated from inference.</p>
-  <p class="implication"><em>Implication:</em> leg (equity / AT1 / senior / CDS), direction, action.</p>
-  <p class="sources"><em>Sources:</em> <a href="URL">source</a></p>
-</div>
+<ul>
+<li><strong>NAME (TICKER)</strong> <span class="tag new">[NEW]</span> — event in one line.
+  <ul>
+    <li><em>Vs. baseline:</em> what is new / what changed / what was confirmed.</li>
+    <li><em>Read:</em> non-consensus angle, fact separated from inference. Leg: equity / AT1 / senior / CDS. Direction. Action.</li>
+    <li><em>Sources:</em> <a href="URL">source</a></li>
+  </ul>
+</li>
+</ul>
 
 <h3 class="sec-names">BY NAME / THEME</h3>
-Remaining material items, condensed:
-<div class="item">
-  <p class="headline"><strong>NAME (TICKER) — [TAG]</strong> event. <em>Read:</em> […]. <em>Implication:</em> […]. <em>Sources:</em> <a href="URL">source</a></p>
-</div>
+<ul>
+<li><strong>NAME (TICKER)</strong> <span class="tag delta-down">[DELTA ▼]</span> — event. <em>Read:</em> […]. Leg / direction / action. <em>Sources:</em> <a href="URL">source</a></li>
+</ul>
 
 <h3 class="sec-credit">CREDIT CORNER</h3>
-Only if there are spread, AT1, or rating developments not covered above. Omit the section entirely if nothing to add.
+Only if there are spread, AT1, or rating developments not covered above. Same bullet format. Omit the section entirely if nothing to add.
+<ul><li>…</li></ul>
 
 <h3 class="sec-calendar">CALENDAR AHEAD</h3>
+<ul><li>…</li></ul>
 Upcoming prints, AT1 call dates, regulatory events in the next 1–5 sessions. Note where in-line is priced and only a deviation matters.
 
 Tags to use: <span class="tag new">[NEW]</span>, <span class="tag delta-up">[DELTA ▲]</span>, <span class="tag delta-down">[DELTA ▼]</span>, <span class="tag in-line">[IN LINE]</span>
 
-If a quiet day, say so briefly — do not manufacture content."""
+If a quiet day, say so in a single bullet — do not manufacture content."""
 
 
 # Tickers to track via Polygon — US-listed or dual-listed names in universe
