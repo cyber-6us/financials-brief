@@ -155,15 +155,18 @@ def fetch_polygon_news(lookback_hours=24):
 
 
 RSS_FEEDS = {
-    "FT Markets":       "https://www.ft.com/rss/home/markets",
-    "FT Companies":     "https://www.ft.com/rss/home/companies",
-    "FT World":         "https://www.ft.com/rss/home/world",
-    "WSJ Markets":      "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
-    "WSJ Business":     "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",
-    "Reuters Business": "https://feeds.reuters.com/reuters/businessNews",
-    "Reuters Finance":  "https://feeds.reuters.com/reuters/financialNews",
-    "Les Echos Finance":"https://www.lesechos.fr/rss/rss_finance.xml",
-    "Les Echos Marches":"https://www.lesechos.fr/rss/rss_marches_financiers.xml",
+    # WSJ — Dow Jones feeds are reliable
+    "WSJ Markets":         "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+    "WSJ Business":        "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",
+    "WSJ Economy":         "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+    # Reuters — new feed URLs via Reuters.com
+    "Reuters Finance":     "https://www.reutersagency.com/feed/?best-topics=business-finance&post_type=best",
+    "Reuters Markets":     "https://www.reutersagency.com/feed/?best-topics=financial-services&post_type=best",
+    # ECB press releases — free, authoritative
+    "ECB Press":           "https://www.ecb.europa.eu/rss/press.html",
+    # Seeking Alpha financials — open RSS
+    "SeekingAlpha Banks":  "https://seekingalpha.com/tag/banks.xml",
+    "SeekingAlpha Finance":"https://seekingalpha.com/tag/financial-services.xml",
 }
 
 
