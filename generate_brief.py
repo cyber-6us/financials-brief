@@ -7,6 +7,7 @@ from datetime import date, datetime, timezone, timedelta
 import xml.etree.ElementTree as ET
 import urllib.request
 import urllib.error
+import time
 
 SYSTEM_PROMPT = """# SYSTEM PROMPT — Daily Financials News Review
 
@@ -134,7 +135,7 @@ def fetch_polygon_news(lookback_hours=24):
     )
     items = []
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; FinBrief/1.0; +https://github.com/cyber-6us/financials-brief)", "Accept": "application/rss+xml, application/xml, text/xml"})
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read())
         for article in data.get("results", []):
@@ -171,7 +172,7 @@ def fetch_rss_headlines(lookback_hours=24):
     items = []
     for source, url in RSS_FEEDS.items():
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; FinBrief/1.0; +https://github.com/cyber-6us/financials-brief)", "Accept": "application/rss+xml, application/xml, text/xml"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 root = ET.fromstring(resp.read())
             ns = {"atom": "http://www.w3.org/2005/Atom"}
@@ -256,6 +257,19 @@ Output: every item — primary, secondary, and macro — is a bullet, tagged wit
 Flag estimated or unconfirmed numbers with [est.]. If sourcing is thin, say so in one clause rather than inflating confidence. Quiet session → say so in a couple of lines; do not manufacture content."""
 
 
+def call_api_with_retry(client, **kwargs):
+    for attempt in range(5):
+        try:
+            return client.beta.messages.create(**kwargs)
+        except anthropic.APIStatusError as e:
+            if e.status_code == 529 and attempt < 4:
+                wait = 30 * (attempt + 1)
+                print(f"API overloaded, retrying in {wait}s...", flush=True)
+                time.sleep(wait)
+            else:
+                raise
+
+
 def generate_brief():
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     messages = [{"role": "user", "content": get_user_prompt()}]
@@ -266,7 +280,8 @@ def generate_brief():
         print(f"Turn {iteration + 1}...", flush=True)
 
         # web_search_20250305 requires the beta header
-        response = client.beta.messages.create(
+        response = call_api_with_retry(
+            client,
             model="claude-sonnet-4-6",
             max_tokens=8000,
             system=SYSTEM_PROMPT,
