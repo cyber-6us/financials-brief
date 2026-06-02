@@ -93,7 +93,62 @@ Tags to use: <span class="tag new">[NEW]</span>, <span class="tag delta-up">[DEL
 If a quiet day, say so briefly — do not manufacture content."""
 
 
-RSS_FEEDS = {
+# Tickers to track via Polygon — US-listed or dual-listed names in universe
+POLYGON_TICKERS = [
+    "DB", "BCS", "ING", "SAN", "HSBC", "UBS",  # European banks US-listed
+    "BNP", "GLE", "UCG",                          # European banks
+    "AXA", "ALVG", "MUV2",                        # Insurers
+    "ADYEN", "WLN", "WISE",                        # Payments
+    "AMUN", "DWS",                                 # Asset managers
+    "APO", "ARES", "BX", "KKR", "OWL",           # Private credit / alt managers
+    "JPM", "BAC", "GS", "MS", "C", "WFC",        # US banks
+    "SPG", "PLD", "O",                             # REITs
+]
+
+UNIVERSE_KEYWORDS = [
+    "Deutsche Bank", "Commerzbank", "BNP Paribas", "Societe Generale", "UniCredit",
+    "Santander", "Barclays", "HSBC", "UBS", "Julius Baer", "ING",
+    "Allianz", "AXA", "Generali", "Zurich", "Munich Re",
+    "Amundi", "DWS", "Adyen", "Worldline", "Nexi", "Wise",
+    "Deutsche Boerse", "Euronext", "London Stock Exchange",
+    "Apollo", "Ares", "Blackstone", "KKR", "Blue Owl", "HPS", "Sixth Street",
+    "ECB", "SNB", "Federal Reserve", "PBoC", "Bank of England",
+    "Basel", "AT1", "CoCo", "CET1", "SREP",
+]
+
+
+def fetch_polygon_news(lookback_hours=24):
+    api_key = os.environ.get("POLYGON_API_KEY", "")
+    if not api_key:
+        print("No POLYGON_API_KEY set, skipping.", flush=True)
+        return []
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=lookback_hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    url = (
+        f"https://api.polygon.io/v2/reference/news"
+        f"?published_utc.gte={cutoff}&limit=100&order=desc&sort=published_utc&apiKey={api_key}"
+    )
+    items = []
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+        for article in data.get("results", []):
+            title     = article.get("title", "").strip()
+            link      = article.get("article_url", "").strip()
+            publisher = article.get("publisher", {}).get("name", "Polygon")
+            tickers   = article.get("tickers", [])
+            # include if a tracked ticker is tagged, or a universe keyword in headline
+            relevant = any(t in POLYGON_TICKERS for t in tickers) or \
+                       any(kw.lower() in title.lower() for kw in UNIVERSE_KEYWORDS)
+            if relevant and title and link:
+                ticker_str = f" [{', '.join(tickers[:4])}]" if tickers else ""
+                items.append(f"- [Polygon/{publisher}]{ticker_str} {title} — {link}")
+    except Exception as e:
+        print(f"Polygon fetch failed: {e}", flush=True)
+    return items
+
+
     "FT Markets":       "https://www.ft.com/rss/home/markets",
     "FT Companies":     "https://www.ft.com/rss/home/companies",
     "FT World":         "https://www.ft.com/rss/home/world",
@@ -140,13 +195,16 @@ def fetch_rss_headlines(lookback_hours=24):
 
 def get_user_prompt():
     today = date.today().strftime("%d %B %Y")
-    headlines = fetch_rss_headlines()
-    if headlines:
+    rss_items     = fetch_rss_headlines()
+    polygon_items = fetch_polygon_news()
+    all_items     = polygon_items + rss_items  # Polygon first — ticker-tagged, fresher
+    if all_items:
         rss_block = (
             "## FRESH HEADLINES FROM PREMIUM FEEDS (last 24h)\n"
+            "Sources: Polygon (ticker-tagged), FT, WSJ, Reuters, Les Echos.\n"
             "Use these as your starting inventory — verify, enrich, and web-search for detail on anything material.\n"
-            "Bloomberg coverage: use web search to find bloomberg.com articles directly.\n\n"
-            + "\n".join(headlines)
+            "Bloomberg: use web search to find bloomberg.com articles directly.\n\n"
+            + "\n".join(all_items)
             + "\n\n---\n\n"
         )
     else:
