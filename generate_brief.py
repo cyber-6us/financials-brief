@@ -3,7 +3,10 @@ import anthropic
 import json
 import os
 import sys
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
+import xml.etree.ElementTree as ET
+import urllib.request
+import urllib.error
 
 SYSTEM_PROMPT = """# SYSTEM PROMPT — Daily Financials News Review
 
@@ -90,9 +93,65 @@ Tags to use: <span class="tag new">[NEW]</span>, <span class="tag delta-up">[DEL
 If a quiet day, say so briefly — do not manufacture content."""
 
 
+RSS_FEEDS = {
+    "FT Markets":       "https://www.ft.com/rss/home/markets",
+    "FT Companies":     "https://www.ft.com/rss/home/companies",
+    "FT World":         "https://www.ft.com/rss/home/world",
+    "WSJ Markets":      "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+    "WSJ Business":     "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",
+    "Reuters Business": "https://feeds.reuters.com/reuters/businessNews",
+    "Reuters Finance":  "https://feeds.reuters.com/reuters/financialNews",
+    "Les Echos Finance":"https://www.lesechos.fr/rss/rss_finance.xml",
+    "Les Echos Marches":"https://www.lesechos.fr/rss/rss_marches_financiers.xml",
+}
+
+
+def fetch_rss_headlines(lookback_hours=24):
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+    items = []
+    for source, url in RSS_FEEDS.items():
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                root = ET.fromstring(resp.read())
+            ns = {"atom": "http://www.w3.org/2005/Atom"}
+            for item in root.iter("item"):
+                title = (item.findtext("title") or "").strip()
+                link  = (item.findtext("link")  or "").strip()
+                pub   = item.findtext("pubDate") or ""
+                # parse pubDate — try common RFC 2822 format
+                pub_dt = None
+                for fmt in ("%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z"):
+                    try:
+                        pub_dt = datetime.strptime(pub.strip(), fmt)
+                        if pub_dt.tzinfo is None:
+                            pub_dt = pub_dt.replace(tzinfo=timezone.utc)
+                        break
+                    except ValueError:
+                        continue
+                if pub_dt and pub_dt < cutoff:
+                    continue
+                if title and link:
+                    items.append(f"- [{source}] {title} — {link}")
+        except Exception as e:
+            print(f"RSS fetch failed for {source}: {e}", flush=True)
+    return items
+
+
 def get_user_prompt():
     today = date.today().strftime("%d %B %Y")
-    return f"""Today is {today}. Run the morning brief (Sweep mode).
+    headlines = fetch_rss_headlines()
+    if headlines:
+        rss_block = (
+            "## FRESH HEADLINES FROM PREMIUM FEEDS (last 24h)\n"
+            "Use these as your starting inventory — verify, enrich, and web-search for detail on anything material.\n"
+            "Bloomberg coverage: use web search to find bloomberg.com articles directly.\n\n"
+            + "\n".join(headlines)
+            + "\n\n---\n\n"
+        )
+    else:
+        rss_block = ""
+    return f"""{rss_block}Today is {today}. Run the morning brief (Sweep mode).
 
 Search the web for **material events in the last 24 hours** (or since the last trading session) across:
 
