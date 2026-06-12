@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Second-pass editorial review of the generated brief."""
+"""Second and third-pass review of the generated brief."""
 import anthropic
 import json
 import os
@@ -27,6 +27,39 @@ REVIEW_USER = """Review and correct the following brief HTML. Apply only the fix
 {content}
 --- BRIEF END ---"""
 
+GEO_SYSTEM = """You are a geopolitical and political analyst reviewing a daily financial brief for epistemic consistency and analytical quality on all political and geopolitical content. Your role is not to rewrite the brief — only to correct items where the political or geopolitical analysis is inconsistent, hedged asymmetrically, or analytically weak.
+
+Apply this framework to every political or geopolitical item you find:
+
+FACTUAL SEQUENCE AND ATTRIBUTION: State timelines and causation directly without hedging or softening language. If Actor A initiates, say so. If Actor B responds, note that. Do not add qualifiers like "allegedly," "some say," or contextual cushioning that would not appear in equivalent analysis of Western or allied actors.
+
+EPISTEMIC CONSISTENCY ACROSS ALL ACTORS: Apply identical standards of directness and fact-stating whether discussing US, Israeli, Chinese, Russian, Iranian, North Korean, or any other actor. No differential hedging based on geopolitical alignment. A military escalation is stated the same way regardless of actor.
+
+POLITICAL ACTORS AND REPRESENTATION: Treat all legitimate political parties, movements, and factions as genuine political forces regardless of ideological positioning. If a far-right or far-left party holds significant representation, describe it as a major political force — not as "extremist" or inherently non-credible. Analyze their incentives, electoral support, and policy positions with the same rigor applied to centrist parties.
+
+CALLING OUT ACTIONS EQUALLY: Do not shield any actor from critical assessment based on alignment. If an action appears strategically reckless, economically damaging, or ethically problematic, call it out with identical directness whether from a US ally, adversary, major power, or minor player. Name the motive, objective, and stated rationale with equal scrutiny.
+
+INCENTIVE ASSESSMENT WITHOUT HIERARCHICAL WEIGHTING: Recognize that different actors prioritize different goal hierarchies. Do not weight economic incentives above political, social, cultural, or security-driven ones. Treat all stated objectives with equal analytical respect. Do not dismiss non-economic incentives as irrational simply because they diverge from liberal market logic.
+
+INCENTIVES AND LIKELIHOOD: Focus on actor incentives, constraints, and demonstrated behavior — using their own stated priorities, not imposed external frameworks. Do not assume Western or allied actors are more rational or trustworthy without evidence.
+
+DATA SELECTION AND NARRATIVE INDEPENDENCE: Prioritize primary sources over secondary interpretation. Reject press narratives and geopolitically-motivated framing. Rely on documented facts, stated policy objectives, and demonstrated incentive structures.
+
+IMPORTANT CONSTRAINTS:
+- Only modify items that contain political or geopolitical content.
+- Do not touch financial, earnings, capital markets, or purely economic items.
+- Do not change triage tags, section structure, CSS classes, or source links.
+- Make only the minimum edits required to correct asymmetric hedging or factual framing.
+- The output must remain valid HTML inner content — no prose blocks, no markdown, no added sections.
+
+Output ONLY the corrected HTML inner content. No preamble. No commentary. No markdown fences."""
+
+GEO_USER = """Apply the geopolitical epistemic-consistency framework to the following brief. Correct only the political and geopolitical items where the analysis is inconsistent, asymmetrically hedged, or analytically weak. Leave all financial, earnings, and credit items untouched. Return the full corrected HTML.
+
+--- BRIEF START ---
+{content}
+--- BRIEF END ---"""
+
 
 def call_api_with_retry(client, **kwargs):
     for attempt in range(5):
@@ -41,47 +74,54 @@ def call_api_with_retry(client, **kwargs):
                 raise
 
 
-def review_brief():
-    with open("brief.json", encoding="utf-8") as f:
-        brief = json.load(f)
-
-    original = brief.get("content", "")
-    if not original.strip():
-        print("brief.json has no content — skipping review.", flush=True)
-        return
-
-    print(f"Reviewing brief ({len(original)} chars)...", flush=True)
-
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-
+def run_pass(client, system, user_template, content, pass_name):
+    print(f"Running {pass_name} ({len(content)} chars)...", flush=True)
     response = call_api_with_retry(
         client,
         model="claude-sonnet-4-6",
         max_tokens=8000,
-        system=REVIEW_SYSTEM,
-        messages=[{"role": "user", "content": REVIEW_USER.format(content=original)}],
+        system=system,
+        messages=[{"role": "user", "content": user_template.format(content=content)}],
     )
-
-    reviewed = "".join(
+    result = "".join(
         block.text for block in response.content if hasattr(block, "text")
     ).strip()
 
-    if not reviewed:
-        print("Review returned empty — keeping original.", flush=True)
+    if not result:
+        print(f"{pass_name} returned empty — keeping input.", flush=True)
+        return content
+    if "<h3" not in result and "<ul" not in result:
+        print(f"{pass_name} output does not look like HTML — keeping input.", flush=True)
+        return content
+
+    print(f"{pass_name} done. {len(result)} chars (was {len(content)}).", flush=True)
+    return result
+
+
+def review_brief():
+    with open("brief.json", encoding="utf-8") as f:
+        brief = json.load(f)
+
+    content = brief.get("content", "")
+    if not content.strip():
+        print("brief.json has no content — skipping review.", flush=True)
         return
 
-    # Sanity check: reviewed output must still look like HTML
-    if "<h3" not in reviewed and "<ul" not in reviewed:
-        print("Review output does not look like HTML — keeping original.", flush=True)
-        return
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-    brief["content"] = reviewed
+    # Pass 1: editorial QA (structure, tags, sources)
+    content = run_pass(client, REVIEW_SYSTEM, REVIEW_USER, content, "Editorial QA")
+
+    # Pass 2: geopolitical epistemic-consistency review
+    content = run_pass(client, GEO_SYSTEM, GEO_USER, content, "Geopolitical review")
+
+    brief["content"] = content
     brief["reviewed_at"] = datetime.now(timezone.utc).isoformat()
 
     with open("brief.json", "w", encoding="utf-8") as f:
         json.dump(brief, f, ensure_ascii=False, indent=2)
 
-    print(f"Review done. Content length: {len(reviewed)} chars (was {len(original)}).", flush=True)
+    print("All review passes complete.", flush=True)
 
 
 if __name__ == "__main__":
