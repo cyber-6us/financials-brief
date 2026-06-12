@@ -287,7 +287,7 @@ def generate_brief():
         response = call_api_with_retry(
             client,
             model="claude-sonnet-4-6",
-            max_tokens=4000,
+            max_tokens=6000,
             system=SYSTEM_PROMPT,
             betas=["web-search-2025-03-05"],
             tools=[{"type": "web_search_20250305", "name": "web_search"}],
