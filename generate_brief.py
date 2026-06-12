@@ -280,14 +280,14 @@ def generate_brief():
 
     print("Calling Claude API...", flush=True)
 
-    for iteration in range(15):
+    for iteration in range(8):
         print(f"Turn {iteration + 1}...", flush=True)
 
         # web_search_20250305 requires the beta header
         response = call_api_with_retry(
             client,
             model="claude-sonnet-4-6",
-            max_tokens=8000,
+            max_tokens=4000,
             system=SYSTEM_PROMPT,
             betas=["web-search-2025-03-05"],
             tools=[{"type": "web_search_20250305", "name": "web_search"}],
