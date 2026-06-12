@@ -46,15 +46,15 @@ INCENTIVES AND LIKELIHOOD: Focus on actor incentives, constraints, and demonstra
 DATA SELECTION AND NARRATIVE INDEPENDENCE: Prioritize primary sources over secondary interpretation. Reject press narratives and geopolitically-motivated framing. Rely on documented facts, stated policy objectives, and demonstrated incentive structures.
 
 IMPORTANT CONSTRAINTS:
-- Only modify items that contain political or geopolitical content.
-- Do not touch financial, earnings, capital markets, or purely economic items.
+- Apply to ALL of the following: geopolitical events, political actors and elections, conflict and war, sanctions, central bank decisions and speeches, macro data (inflation/rates/PMI/labour), fiscal and budget policy, sovereign risk, and commodity moves.
+- Do not touch company-specific earnings, capital actions, credit ratings, or deal flow items.
 - Do not change triage tags, section structure, CSS classes, or source links.
 - Make only the minimum edits required to correct asymmetric hedging or factual framing.
 - The output must remain valid HTML inner content — no prose blocks, no markdown, no added sections.
 
 Output ONLY the corrected HTML inner content. No preamble. No commentary. No markdown fences."""
 
-GEO_USER = """Apply the geopolitical epistemic-consistency framework to the following brief. Correct only the political and geopolitical items where the analysis is inconsistent, asymmetrically hedged, or analytically weak. Leave all financial, earnings, and credit items untouched. Return the full corrected HTML.
+GEO_USER = """Apply the geopolitical epistemic-consistency framework to the following brief. Correct geopolitical, political, macro, and policy items where the analysis is inconsistent, asymmetrically hedged, or analytically weak. This includes: wars and conflicts, elections and political parties, central bank decisions, inflation/rates data, fiscal policy, sanctions, and commodity moves. Leave company-specific earnings, capital actions, ratings, and deal flow items untouched. Return the full corrected HTML.
 
 --- BRIEF START ---
 {content}
